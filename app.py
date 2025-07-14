@@ -88,14 +88,14 @@ while True:
         "returnSecureToken": True
     }
 
-    response = requests.post(firebase_config.FIREBASE_SIGNIN_ENDPOINT, json=request_payload)
+    response = requests.post(firebase_config.AUTH_SIGNIN_ENDPOINT, json=request_payload)
     response_payload = response.json()
     if response.status_code == 200:
-        firebase_config.FIREBASE_TOKEN_CREATE_TIME = datetime.now()
-        firebase_config.FIREBASE_AUTH_ID_TOKEN = response_payload["idToken"]
-        firebase_config.FIREBASE_AUTH_REFRESH_TOKEN = response_payload["refreshToken"]
-        firebase_config.FIREBASE_USER_ID = response_payload["localId"]
-        firebase_config.FIREBASE_TOKEN_EXPIRE = int(response_payload["expiresIn"]) 
+        firebase_config.AUTH_ID_TOKEN_CREATE_TIME = datetime.now()
+        firebase_config.AUTH_ID_TOKEN = response_payload["idToken"]
+        firebase_config.AUTH_REFRESH_TOKEN = response_payload["refreshToken"]
+        firebase_config.USER_ID = response_payload["localId"]
+        firebase_config.AUTH_ID_TOKEN_EXPIRE = int(response_payload["expiresIn"]) 
         break
     else:
         error = response_payload["error"]["message"]

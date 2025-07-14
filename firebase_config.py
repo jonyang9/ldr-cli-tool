@@ -8,10 +8,10 @@ firebaseConfig = {
     "appId": "1:915926597401:web:f1cf701c1cba63873acf88"
 }
 
-FIREBASE_AUTH_ID_TOKEN = None
-FIREBASE_USER_ID = None
-FIREBASE_AUTH_REFRESH_TOKEN = None
-FIREBASE_TOKEN_EXPIRE = None
-FIREBASE_TOKEN_CREATE_TIME  = None
-FIREBASE_SIGNIN_ENDPOINT = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebaseConfig['apiKey']}"
-FIREBASE_TOKEN_REFRESH_ENDPOINT = f"https://securetoken.googleapis.com/v1/token?key={firebaseConfig["apiKey"]}"
+AUTH_ID_TOKEN = None
+USER_ID = None
+AUTH_REFRESH_TOKEN = None
+AUTH_ID_TOKEN_EXPIRE = None
+AUTH_ID_TOKEN_CREATE_TIME  = None
+AUTH_SIGNIN_ENDPOINT = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebaseConfig['apiKey']}"
+AUTH_TOKEN_REFRESH_ENDPOINT = f"https://securetoken.googleapis.com/v1/token?key={firebaseConfig["apiKey"]}"
