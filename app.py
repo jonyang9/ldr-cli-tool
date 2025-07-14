@@ -1,6 +1,9 @@
 import shlex
 from datetime import datetime
 import commands
+import getpass
+import requests
+import firebase_config
 
 COMMANDS = {
     "help": commands.help,
@@ -53,14 +56,67 @@ def runCommand(args):
     
     
 
-print("Welcome to ldr-cli, type help for options!")
-# Main input loop
+print("Welcome to ldr-cli, please complete the authentication steps.")
+
+# Authentication loop
+while True:
+    while True:
+        email = input("Enter your email: ")
+        print(f"Your email is: '{email}'\n")
+
+        while True:
+            yes_or_no = input("Is this correct? (yes/no)").strip().lower()
+            if yes_or_no in ("yes", "no"):
+                break
+            else:
+                print("Please answer 'yes' or 'no'.")
+
+        if yes_or_no == "yes":
+            break
+    
+    while True:
+        password = getpass.getpass("Enter your password: ")
+        confirm_password = getpass.getpass("Confirm your password: ")
+        if password != confirm_password:
+            print("Passwords don't match. Please try again.")
+        else:
+            break
+    
+    request_payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+
+    response = requests.post(firebase_config.FIREBASE_SIGNIN_ENDPOINT, json=request_payload)
+    response_payload = response.json()
+    if response.status_code == 200:
+        firebase_config.FIREBASE_AUTH_ID_TOKEN = response_payload["idToken"]
+        firebase_config.FIREBASE_AUTH_REFRESH_TOKEN = response_payload["refreshToken"]
+        firebase_config.FIREBASE_USER_ID = response_payload["localId"]
+        firebase_config.FIREBASE_TOKEN_EXPIRE = response_payload["expiresIn"]
+        break
+    else:
+        error = response_payload["error"]["message"]
+        if error == "EMAIL_NOT_FOUND":
+            print("There is no matching email for the given user")
+        elif error == "INVALID_PASSWORD":
+            print("The password is incorrect for the given email.")
+        elif error == "USER_DISABLED":
+            print("The account has been disabled.")
+
+    
+
+
+    
+
+
+
+    
+print("You've signed in! Type help for options.")
+# Main command input loop
 while True:
     command_line_input = input("--> ")
     args = shlex.split(command_line_input)
     if validateCommand(args):
         pass
-
-    
-        
-

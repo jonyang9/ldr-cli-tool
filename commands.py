@@ -1,4 +1,5 @@
 from rich import print as rich_print
+import requests
 
 def sendMessage(message):
     pass
@@ -13,6 +14,7 @@ def addDate():
     pass
 
 def quit():
+    print("Goodbye!")
     exit(0)
 
 def help():
