@@ -1,5 +1,7 @@
 from rich import print as rich_print
 import requests
+import datetime
+import firebase_config
 
 def sendMessage(message):
     pass
@@ -26,4 +28,27 @@ def help():
         "setupDate [italic]date[/italic] - adds a date to your shared calendar, date must be in MM/DD/YYYY format."
     ]
     rich_print("\n".join(usages))
+
+def checkTokenRefresh():
+    # If the Firebase ID Token is expired, refresh it
+    now = datetime.now()
+    diff = now - firebase_config.FIREBASE_TOKEN_CREATE_TIME
+    secs = diff.total_seconds()
+    if secs > firebase_config.FIREBASE_TOKEN_EXPIRE:
+        request_data = {
+            "grant_type": "refresh_token",
+            "refresh_token": firebase_config.FIREBASE_AUTH_REFRESH_TOKEN
+        }
+        response = requests.post(firebase_config.FIREBASE_TOKEN_REFRESH_ENDPOINT, data=request_data)
+        response_payload = response.json()
+        if response.status_code == 200:
+            firebase_config.FIREBASE_TOKEN_CREATE_TIME = datetime.now()
+            firebase_config.FIREBASE_AUTH_ID_TOKEN = response_payload["id_token"]
+            firebase_config.FIREBASE_TOKEN_EXPIRE = int(response_payload["expires_in"])
+            firebase_config.FIREBASE_AUTH_REFRESH_TOKEN = response_payload["refresh_token"]
+            firebase_config.FIREBASE_USER_ID = response_payload["user_id"]
+        else:
+            error = response_payload["error"]["message"]
+            print(f"Error with sign-in: {error}")
+
 

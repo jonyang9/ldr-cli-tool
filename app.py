@@ -62,14 +62,14 @@ print("Welcome to ldr-cli, please complete the authentication steps.")
 while True:
     while True:
         email = input("Enter your email: ")
-        print(f"Your email is: '{email}'\n")
+        print(f"Your email is: '{email}'")
 
         while True:
-            yes_or_no = input("Is this correct? (yes/no)").strip().lower()
+            yes_or_no = input("Is this correct? (yes/no) ").strip().lower()
             if yes_or_no in ("yes", "no"):
                 break
             else:
-                print("Please answer 'yes' or 'no'.")
+                print("Please answer 'yes' or 'no'. ")
 
         if yes_or_no == "yes":
             break
@@ -91,19 +91,16 @@ while True:
     response = requests.post(firebase_config.FIREBASE_SIGNIN_ENDPOINT, json=request_payload)
     response_payload = response.json()
     if response.status_code == 200:
+        firebase_config.FIREBASE_TOKEN_CREATE_TIME = datetime.now()
         firebase_config.FIREBASE_AUTH_ID_TOKEN = response_payload["idToken"]
         firebase_config.FIREBASE_AUTH_REFRESH_TOKEN = response_payload["refreshToken"]
         firebase_config.FIREBASE_USER_ID = response_payload["localId"]
-        firebase_config.FIREBASE_TOKEN_EXPIRE = response_payload["expiresIn"]
+        firebase_config.FIREBASE_TOKEN_EXPIRE = int(response_payload["expiresIn"]) 
         break
     else:
         error = response_payload["error"]["message"]
-        if error == "EMAIL_NOT_FOUND":
-            print("There is no matching email for the given user")
-        elif error == "INVALID_PASSWORD":
-            print("The password is incorrect for the given email.")
-        elif error == "USER_DISABLED":
-            print("The account has been disabled.")
+        print(f"Error with sign-in: {error}")
+
 
     
 
