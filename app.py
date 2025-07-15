@@ -53,11 +53,8 @@ def runCommand(args):
         cmd()
     elif args[0] in ["send", "setupDate"]:
         cmd(args[1])
-        
+    
 
-        
-    
-    
 
 print("Welcome to ldr-cli, please complete the authentication steps.")
 

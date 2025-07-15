@@ -20,7 +20,6 @@ def sendMessage(message):
     response_payload = response.json()
     if response.status_code == 200:
         print("Message sent successfully")
-        print(json.dumps(response_payload, indent=4))
     else:
         print(json.dumps(response_payload, indent=4))
 
@@ -41,8 +40,10 @@ def retrieveMessages():
     response = requests.post(firebase_config.FIRESTORE_QUERY_ENDPOINT, json=request_payload, headers=headers)
     response_payload = response.json()
     if response.status_code == 200:
+        messages_exist = False
         for item in response_payload:
             if "document" in item:
+                messages_exist = True
                 doc = item["document"]
                 fields = doc["fields"]
                 message = fields["message"]["stringValue"]
@@ -51,13 +52,34 @@ def retrieveMessages():
                     print(f"Me: {message}")
                 else:
                     print(f"Them: {message}")
+        
+        if not messages_exist:
+            print("No recent messages.")
     else:
         print(json.dumps(response_payload, indent=4))
 
 
 def ping():
-    print("running ping command")
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+    request_payload = {
+        "fields": {
+            "isValid": {"booleanValue": True},
+            "createdAt": {"timestampValue": datetime.now(timezone.utc).isoformat()}
+        }
+    }
+    response = requests.patch(firebase_config.getPingEndpoint(), json=request_payload, headers=headers)
+    if response.status_code == 200:
+        print("Ping successfully sent!")
+    else:
+        response_payload = response.json()
+        print(json.dumps(response_payload, indent=4))
+
+def getPing():
     pass
+
 
 def addDate(dateString):
     print("running setupDate command")

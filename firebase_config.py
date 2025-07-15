@@ -20,3 +20,6 @@ AUTH_TOKEN_REFRESH_ENDPOINT = f"https://securetoken.googleapis.com/v1/token?key=
 FIRESTORE_MESSAGES_ENDPOINT = f"https://firestore.googleapis.com/v1/projects/{firebaseConfig['projectId']}/databases/(default)/documents/messages"
 
 FIRESTORE_QUERY_ENDPOINT = f"https://firestore.googleapis.com/v1/projects/{firebaseConfig['projectId']}/databases/(default)/documents/:runQuery"
+
+def getPingEndpoint():
+    return f"https://firestore.googleapis.com/v1/projects/{firebaseConfig['projectId']}/databases/(default)/documents/pings/{USER_ID}"
