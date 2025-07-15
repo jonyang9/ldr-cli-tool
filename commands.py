@@ -1,18 +1,38 @@
 from rich import print as rich_print
 import requests
-import datetime
+from datetime import datetime, timezone
 import firebase_config
+import json
 
 def sendMessage(message):
-    pass
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+    request_payload = {
+        "fields": {
+            "user_id": {"stringValue": firebase_config.USER_ID},
+            "message": {"stringValue": message},
+            "createdAt": {"timestampValue": datetime.now(timezone.utc).isoformat()}
+        }
+    }
+    response = requests.post(firebase_config.FIRESTORE_MESSAGES_ENDPOINT, json=request_payload, headers=headers)
+    response_payload = response.json()
+    if response.status_code == 200:
+        print("Message sent successfully")
+    else:
+        print(json.dumps(response_payload, indent=4))
 
 def retrieveMessages():
+    print("running view command")
     pass
 
 def ping():
+    print("running ping command")
     pass
 
-def addDate():
+def addDate(dateString):
+    print("running setupDate command")
     pass
 
 def quit():
@@ -22,7 +42,7 @@ def quit():
 def help():
     usages = [
         "quit - quits the application.",
-        "send [italic]message[/italic] - sends a message to your partner.",
+        "send [italic white]'message'[/italic white] - sends a message to your partner (use quotations if message includes whitespace).",
         "view - view recent messages with your partner.",
         "ping - ping your partner with a heart.",
         "setupDate [italic]date[/italic] - adds a date to your shared calendar, date must be in MM/DD/YYYY format."
@@ -50,5 +70,4 @@ def checkTokenRefresh():
         else:
             error = response_payload["error"]["message"]
             print(f"Error with sign-in: {error}")
-
 

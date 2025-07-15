@@ -16,7 +16,7 @@ COMMANDS = {
 
 
 def validateCommand(args):
-    # args is a list of strings entered in the command line
+    # returns True if the command is valid, false otherwise
     if not args:
         return False
     if args[0] not in COMMANDS:
@@ -49,7 +49,10 @@ def validateCommand(args):
 
 def runCommand(args):
     cmd = COMMANDS[args[0]]
-    cmd()
+    if args[0] in ["help", "quit", "view", "ping"]:
+        cmd()
+    elif args[0] in ["send", "setupDate"]:
+        cmd(args[1])
         
 
         
@@ -102,18 +105,18 @@ while True:
         print(f"Error with sign-in: {error}")
 
 
-    
-
-
-    
-
-
 
     
 print("You've signed in! Type help for options.")
 # Main command input loop
 while True:
     command_line_input = input("--> ")
-    args = shlex.split(command_line_input)
-    if validateCommand(args):
-        pass
+    try:
+        args = shlex.split(command_line_input)
+        if validateCommand(args):
+            # pass
+            runCommand(args)
+        
+    except ValueError as error:
+        print(f"Error parsing command: {error}")
+    
