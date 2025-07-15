@@ -20,12 +20,40 @@ def sendMessage(message):
     response_payload = response.json()
     if response.status_code == 200:
         print("Message sent successfully")
+        print(json.dumps(response_payload, indent=4))
     else:
         print(json.dumps(response_payload, indent=4))
 
 def retrieveMessages():
-    print("running view command")
-    pass
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+    request_payload = {
+        "structuredQuery": {
+            "from": [{"collectionId": "messages"}],
+            "orderBy": [{
+                "field": {"fieldPath": "createdAt"},
+                "direction": "ASCENDING"
+            }]
+        }
+    }
+    response = requests.post(firebase_config.FIRESTORE_QUERY_ENDPOINT, json=request_payload, headers=headers)
+    response_payload = response.json()
+    if response.status_code == 200:
+        for item in response_payload:
+            if "document" in item:
+                doc = item["document"]
+                fields = doc["fields"]
+                message = fields["message"]["stringValue"]
+                user_id = fields["user_id"]["stringValue"]
+                if user_id == firebase_config.USER_ID:
+                    print(f"Me: {message}")
+                else:
+                    print(f"Them: {message}")
+    else:
+        print(json.dumps(response_payload, indent=4))
+
 
 def ping():
     print("running ping command")
