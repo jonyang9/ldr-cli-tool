@@ -78,7 +78,71 @@ def ping():
         print(json.dumps(response_payload, indent=4))
 
 def getPing():
-    pass
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+
+    ping_file_path = f"projects/{firebase_config.firebaseConfig['projectId']}/databases/(default)/documents/pings/{firebase_config.USER_ID}"
+    query_payload = {
+        "structuredQuery": {
+            "from": [{"collectionId": "pings"}],
+            "where": {
+                "fieldFilter": {
+                    "field": {"fieldPath": "__name__"},
+                    "op": "NOT_EQUAL",
+                    "value": {"referenceValue": ping_file_path}
+                }
+            }
+        }
+    }
+
+
+    query_response = requests.post(firebase_config.FIRESTORE_QUERY_ENDPOINT, json=query_payload, headers=headers)
+    query_response_payload = query_response.json()
+    if query_response.status_code != 200:
+        print(json.dumps(query_response_payload, indent=4))
+        return
+    
+    ping_document_exists = False
+    ping_document_obj = None
+    for item in query_response_payload:
+        if "document" in item:
+            ping_document_exists = True
+            ping_document_obj = item
+
+    if not ping_document_exists:
+        return
+    
+    doc = ping_document_obj["document"]
+    name = doc["name"]
+    fields = doc["fields"]
+    isValid = fields["isValid"]["booleanValue"]
+    pingDateString = fields["createdAt"]["timestampValue"]
+    if not isValid:
+        return
+    
+
+    datetime_utc = datetime.fromisoformat(pingDateString.replace("Z", "+00:00"))
+    datetime_local = datetime_utc.astimezone()
+    local_date = datetime_local.date()
+    local_time = datetime_local.strftime("%I:%M %p")
+    rich_print(f"\n[bold red]You were sent a :heart:  on {local_date} at {local_time}[bold red]\n")
+
+    ping_endpoint = f"https://firestore.googleapis.com/v1/{name}"
+    params = [
+        ("updateMask.fieldPaths", "isValid")
+    ]
+    patch_payload = {
+        "fields": {
+            "isValid": {"booleanValue": False}
+        }
+    }
+    patch_response = requests.patch(ping_endpoint, json=patch_payload, headers=headers, params=params)
+    patch_response_payload = patch_response.json()
+    if patch_response.status_code != 200:
+        print(json.dumps(patch_response_payload, indent=4))
+    
 
 
 def addDate(dateString):

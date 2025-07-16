@@ -105,6 +105,9 @@ while True:
 
     
 print("You've signed in! Type help for options.")
+
+commands.getPing()
+
 # Main command input loop
 while True:
     command_line_input = input("--> ")
