@@ -49,9 +49,9 @@ def retrieveMessages():
                 message = fields["message"]["stringValue"]
                 user_id = fields["user_id"]["stringValue"]
                 if user_id == firebase_config.USER_ID:
-                    print(f"Me: {message}")
+                    rich_print(f"[blue]Me: {message}[/blue]")
                 else:
-                    print(f"Them: {message}")
+                    rich_print(f"[magenta]Them: {message}[/magenta]")
         
         if not messages_exist:
             print("No recent messages.")
@@ -127,7 +127,7 @@ def getPing():
     datetime_local = datetime_utc.astimezone()
     local_date = datetime_local.date()
     local_time = datetime_local.strftime("%I:%M %p")
-    rich_print(f"\n[bold red]You were sent a :heart:  on {local_date} at {local_time}[bold red]\n")
+    rich_print(f"\n[bold red]You were sent a :heart:  on {local_date} at {local_time}[/bold red]\n")
 
     ping_endpoint = f"https://firestore.googleapis.com/v1/{name}"
     params = [

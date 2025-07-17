@@ -56,16 +56,22 @@ def runCommand(args):
     
 
 
-print("Welcome to ldr-cli, please complete the authentication steps.")
+print("Welcome to ldr-cli, please complete the authentication steps. Type 'quit' anytime to exit.")
 
 # Authentication loop
 while True:
     while True:
         email = input("Enter your email: ")
+        if email.strip().lower() == "quit":
+            exit(0)
         print(f"Your email is: '{email}'")
 
         while True:
             yes_or_no = input("Is this correct? (yes/no) ").strip().lower()
+
+            if yes_or_no.strip().lower() == "quit":
+                exit(0)
+            
             if yes_or_no in ("yes", "no"):
                 break
             else:
@@ -114,7 +120,6 @@ while True:
     try:
         args = shlex.split(command_line_input)
         if validateCommand(args):
-            # pass
             runCommand(args)
         
     except ValueError as error:
