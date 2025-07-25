@@ -9,9 +9,10 @@ COMMANDS = {
     "help": commands.help,
     "quit": commands.quit,
     "send": commands.sendMessage,
-    "view": commands.retrieveMessages,
+    "messages": commands.retrieveMessages,
     "ping": commands.ping,
-    "setupDate": commands.addDate
+    "setupDate": commands.addDate,
+    "dates": commands.viewDates
 }
 
 
@@ -23,7 +24,7 @@ def validateCommand(args):
         print(f"{args[0]} is not a valid command, type help for usage")
         return False
     match args[0]:
-        case "help" | "quit" | "view" | "ping":
+        case "help" | "quit" | "messages" | "ping" | "dates":
             if len(args) > 1:
                 print(f"Command failed. Too many arguments to the {args[0]} command.")
                 return False
@@ -32,7 +33,7 @@ def validateCommand(args):
                 print("Command failed. Incorrect number of arguments to the send command.")
                 return False
         case "setupDate":
-            if len(args) != 2:
+            if len(args) != 3:
                 print("Command failed. Incorrect number of arguments to the setupDate command.")
                 return False
             try:
@@ -49,11 +50,12 @@ def validateCommand(args):
 
 def runCommand(args):
     cmd = COMMANDS[args[0]]
-    if args[0] in ["help", "quit", "view", "ping"]:
+    if args[0] in ["help", "quit", "messages", "ping", "dates"]:
         cmd()
-    elif args[0] in ["send", "setupDate"]:
+    elif args[0] in ["send"]:
         cmd(args[1])
-    
+    elif args[0] in ["setupDate"]:
+        cmd(args[1], args[2])
 
 
 print("Welcome to ldr-cli, please complete the authentication steps. Type 'quit' anytime to exit.")

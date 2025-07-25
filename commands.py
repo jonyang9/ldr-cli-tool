@@ -145,9 +145,115 @@ def getPing():
     
 
 
-def addDate(dateString):
-    print("running setupDate command")
-    pass
+def addDate(dateString, event):
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+
+    # Check if there is an event with the same date and name added
+
+    query_payload = {
+        "structuredQuery": {
+            "from": [{"collectionId": "dates"}],
+            "where": {
+                "compositeFilter": {
+                    "op": "AND",
+                    "filters": [{
+                        "fieldFilter": {
+                            "field": {"fieldPath": "date"},
+                            "op": "EQUAL",
+                            "value": {"timestampValue": datetime.strptime(dateString, "%m/%d/%Y").isoformat() + "Z"}
+                        }
+                    },
+                    {
+                        "fieldFilter": {
+                            "field": {"fieldPath": "event"},
+                            "op": "EQUAL",
+                            "value": {"stringValue": event}
+                        }   
+                    }]
+                }
+            }
+        }
+    }
+
+    query_response = requests.post(firebase_config.FIRESTORE_QUERY_ENDPOINT, json=query_payload, headers=headers)
+    query_response_payload = query_response.json()
+    if query_response.status_code != 200:
+        print(json.dumps(query_response_payload, indent=4))
+        return
+    
+    event_exists = False
+    for item in query_response_payload:
+        if "document" in item:
+            event_exists = True
+
+    if event_exists:
+        print("Failed to add the date. The event already exists!")
+        return
+
+    request_payload = {
+        "fields": {
+            "date": {
+                "timestampValue": datetime.strptime(dateString, "%m/%d/%Y").isoformat() + "Z"
+            },
+            "event": {
+                "stringValue": event
+            }
+        }
+    }
+
+    response = requests.post(firebase_config.FIRESTORE_DATES_ENDPOINT, json=request_payload, headers=headers)
+    response_payload = response.json()
+    if response.status_code != 200:
+        print(json.dumps(response_payload, indent=4))
+        return
+    
+    print("Event successfully added!")
+    
+def viewDates():
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+
+    request_payload = {
+        "structuredQuery": {
+            "from": [{"collectionId": "dates"}]
+        }
+    }
+
+    response = requests.post(firebase_config.FIRESTORE_QUERY_ENDPOINT, json=request_payload, headers=headers)
+    response_payload = response.json()
+    if response.status_code != 200:
+        print(json.dumps(response_payload, indent=4))
+        return
+    
+    events_exist = False
+    for item in response_payload:
+        if "document" in item:
+            events_exist = True
+            doc = item["document"]
+            fields = doc["fields"]
+            event = fields["event"]["stringValue"]
+            dateString = fields["date"]["timestampValue"]
+            dateFormatted = datetime.fromisoformat(dateString.replace("Z", "+00:00")).strftime("%m/%d/%Y")
+            print(f"Event: {event} Date: {dateFormatted}")
+
+    if not events_exist:
+        print("No dates added.")
+
+
+def getDate():
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+
+    
+    
+    
 
 def quit():
     print("Goodbye!")
@@ -157,9 +263,10 @@ def help():
     usages = [
         "quit - quits the application.",
         "send [italic white]'message'[/italic white] - sends a message to your partner (use quotations if message includes whitespace).",
-        "view - view recent messages with your partner.",
+        "messages - view recent messages with your partner.",
         "ping - ping your partner with a heart.",
-        "setupDate [italic]date[/italic] - adds a date to your shared calendar, date must be in MM/DD/YYYY format."
+        "setupDate [italic]date[/italic] [italic white]'event'[/italic white] - adds a date to your shared calendar for the specified event, date must be in MM/DD/YYYY format. (use quotations if event includes whitespace)",
+        "dates - view upcoming dates"
     ]
     rich_print("\n".join(usages))
 

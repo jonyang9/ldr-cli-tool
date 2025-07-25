@@ -21,5 +21,7 @@ FIRESTORE_MESSAGES_ENDPOINT = f"https://firestore.googleapis.com/v1/projects/{fi
 
 FIRESTORE_QUERY_ENDPOINT = f"https://firestore.googleapis.com/v1/projects/{firebaseConfig['projectId']}/databases/(default)/documents/:runQuery"
 
+FIRESTORE_DATES_ENDPOINT = f"https://firestore.googleapis.com/v1/projects/{firebaseConfig['projectId']}/databases/(default)/documents/dates"
+
 def getPingEndpoint():
     return f"https://firestore.googleapis.com/v1/projects/{firebaseConfig['projectId']}/databases/(default)/documents/pings/{USER_ID}"
