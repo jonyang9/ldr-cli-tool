@@ -241,8 +241,94 @@ def getDate():
         "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
     }
 
+    request_payload = {
+        "structuredQuery": {
+            "from": [{"collectionId": "dates"}],
+            "orderBy": [{
+                "field": {"fieldPath": "date"},
+                "direction": "ASCENDING"
+            }],
+            "limit": 1
+        }
+    }
+
+    response = requests.post(firebase_config.FIRESTORE_QUERY_ENDPOINT, json=request_payload, headers=headers)
+    response_payload = response.json()
+    if response.status_code != 200:
+        print(json.dumps(response_payload, indent=4))
+        return
     
     
+    for item in response_payload:
+        if "document" in item:
+            doc = item["document"]
+            fields = doc["fields"]
+            event = fields["event"]["stringValue"]
+            dateString = fields["date"]["timestampValue"]
+            dateObj = datetime.fromisoformat(dateString.replace("Z", "+00:00"))
+            now = datetime.now()
+            diff_days = (dateObj.date() - now.date()).days
+            if diff_days == 0:
+                print(f"You have a date today! Event: {event}")
+            elif diff_days > 0:
+                print(f"Upcoming date: In {diff_days} days, you have an event: {event}")
+            else:
+                print("error, date is in the past")
+
+def deleteDate(event):
+    checkTokenRefresh()
+    headers = {
+        "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
+    }
+
+    query_payload = {
+        "structuredQuery": {
+            "from": [{"collectionId": "dates"}],
+            "where": {
+                "fieldFilter": {
+                    "field": {"fieldPath": "event"},
+                    "op": "EQUAL",
+                    "value": {
+                        "stringValue": event
+                    }
+                }
+            },
+            "orderBy": [{
+                "field": {"fieldPath": "date"},
+                "direction": "ASCENDING"
+            }],
+            "limit": 1
+        }
+    }
+
+    query_response = requests.post(firebase_config.FIRESTORE_QUERY_ENDPOINT, json=query_payload, headers=headers)
+    query_response_payload = query_response.json()
+    if query_response.status_code != 200:
+        print("QUERY FAILED!")
+        print(json.dumps(query_response_payload, indent=4))
+        return
+    
+    event_exists = False
+    for item in query_response_payload:
+        if "document" in item:
+            event_exists = True
+            doc = item["document"]
+            name = doc["name"]
+
+    if not event_exists:
+        print("Event does not exist.")
+        return
+    
+    date_endpoint = f"https://firestore.googleapis.com/v1/{name}"
+
+    response = requests.delete(date_endpoint, headers=headers)
+    if response.status_code == 200:
+        print("Event deleted successfully.")
+    else:
+        print(json.dumps(response.json(), indent=4))
+        return
+            
+            
     
 
 def quit():
@@ -256,7 +342,8 @@ def help():
         "messages - view recent messages with your partner.",
         "ping - ping your partner with a heart.",
         "setupDate [italic]date[/italic] [italic white]'event'[/italic white] - adds a date to your shared calendar for the specified event, date must be in MM/DD/YYYY format. (use quotations if event includes whitespace)",
-        "dates - view upcoming dates"
+        "dates - view upcoming dates",
+        "deleteDate [italic white]'event'[/italic white] - deletes the date with the given event"
     ]
     rich_print("\n".join(usages))
 

@@ -12,7 +12,8 @@ COMMANDS = {
     "messages": commands.retrieveMessages,
     "ping": commands.ping,
     "setupDate": commands.addDate,
-    "dates": commands.viewDates
+    "dates": commands.viewDates,
+    "deleteDate": commands.deleteDate
 }
 
 
@@ -28,13 +29,13 @@ def validateCommand(args):
             if len(args) > 1:
                 print(f"Command failed. Too many arguments to the {args[0]} command.")
                 return False
-        case "send":
+        case "send" | "deleteDate":
             if len(args) != 2:
-                print("Command failed. Incorrect number of arguments to the send command.")
+                print(f"Command failed. Incorrect number of arguments to the {args[0]} command.")
                 return False
         case "setupDate":
             if len(args) != 3:
-                print("Command failed. Incorrect number of arguments to the setupDate command.")
+                print(f"Command failed. Incorrect number of arguments to the {args[0]} command.")
                 return False
             try:
                 date_obj = datetime.strptime(args[1], "%m/%d/%Y")
@@ -52,7 +53,7 @@ def runCommand(args):
     cmd = COMMANDS[args[0]]
     if args[0] in ["help", "quit", "messages", "ping", "dates"]:
         cmd()
-    elif args[0] in ["send"]:
+    elif args[0] in ["send", "deleteDate"]:
         cmd(args[1])
     elif args[0] in ["setupDate"]:
         cmd(args[1], args[2])
@@ -115,6 +116,7 @@ while True:
 print("You've signed in! Type help for options.")
 
 commands.getPing()
+commands.getDate()
 
 # Main command input loop
 while True:
