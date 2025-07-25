@@ -151,28 +151,18 @@ def addDate(dateString, event):
         "Authorization": f"Bearer {firebase_config.AUTH_ID_TOKEN}"
     }
 
-    # Check if there is an event with the same date and name added
+    # Check if there is an event with the same date
 
     query_payload = {
         "structuredQuery": {
             "from": [{"collectionId": "dates"}],
             "where": {
-                "compositeFilter": {
-                    "op": "AND",
-                    "filters": [{
-                        "fieldFilter": {
-                            "field": {"fieldPath": "date"},
-                            "op": "EQUAL",
-                            "value": {"timestampValue": datetime.strptime(dateString, "%m/%d/%Y").isoformat() + "Z"}
-                        }
-                    },
-                    {
-                        "fieldFilter": {
-                            "field": {"fieldPath": "event"},
-                            "op": "EQUAL",
-                            "value": {"stringValue": event}
-                        }   
-                    }]
+                "fieldFilter": {
+                    "field": {"fieldPath": "date"},
+                    "op": "EQUAL",
+                    "value": {
+                        "timestampValue": datetime.strptime(dateString, "%m/%d/%Y").isoformat() + "Z"
+                    }
                 }
             }
         }
@@ -190,7 +180,7 @@ def addDate(dateString, event):
             event_exists = True
 
     if event_exists:
-        print("Failed to add the date. The event already exists!")
+        print("Failed to setup the date. One already exists on the given date.")
         return
 
     request_payload = {
