@@ -1,4 +1,4 @@
-# Run as a cron job to delete old messages and events
+# Run as a cron job to delete old messages and dates
 
 import requests
 import firebase_config
