@@ -71,7 +71,9 @@ for item in response_payload:
         endpoint = url_base + name
         delete_response = requests.delete(endpoint, headers=headers)
         if delete_response.status_code == 200:
-            print("Deleted a message.")
+            print(f"Deleted a message. Document: {name}")
+        else:
+            print(f"Error deleting a message.\nDocument: {name}\nError: {json.dumps(delete_response.json(), indent=4)}")
 
 today_timestamp = today_date.isoformat() + "T00:00:00Z"
 print(today_timestamp)
@@ -103,4 +105,6 @@ for item in response_payload:
         endpoint = url_base + name
         delete_response = requests.delete(endpoint, headers=headers)
         if delete_response.status_code == 200:
-            print("Deleted a date.")
+            print(f"Deleted a date. Document: {name}")
+        else:
+            print(f"Error deleting a date.\nDocument: {name}\nError: {json.dumps(delete_response.json(), indent=4)}")
