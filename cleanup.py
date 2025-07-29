@@ -40,7 +40,6 @@ days_old = 30
 today_date = datetime.now().date()
 cutoff = today_date - timedelta(days=days_old)
 cutoff_timestamp = cutoff.isoformat() + "T00:00:00Z"
-print(cutoff_timestamp)
 
 query_payload = {
   "structuredQuery": {
@@ -68,15 +67,18 @@ for item in response_payload:
     if "document" in item:
         doc = item["document"]
         name = doc["name"]
+
+        fields = doc["fields"]
+        message = fields["message"]["stringValue"]
+
         endpoint = url_base + name
         delete_response = requests.delete(endpoint, headers=headers)
         if delete_response.status_code == 200:
-            print(f"Deleted a message. Document: {name}")
+            print(f"Deleted a message. Message: {message}")
         else:
-            print(f"Error deleting a message.\nDocument: {name}\nError: {json.dumps(delete_response.json(), indent=4)}")
+            print(f"Error deleting a message.\nDocument ID: {name}\nError: {json.dumps(delete_response.json(), indent=4)}")
 
 today_timestamp = today_date.isoformat() + "T00:00:00Z"
-print(today_timestamp)
 
 query_payload = {
   "structuredQuery": {
@@ -102,9 +104,13 @@ for item in response_payload:
     if "document" in item:
         doc = item["document"]
         name = doc["name"]
+
+        fields = doc["fields"]
+        event = fields["event"]["stringValue"]
+
         endpoint = url_base + name
         delete_response = requests.delete(endpoint, headers=headers)
         if delete_response.status_code == 200:
-            print(f"Deleted a date. Document: {name}")
+            print(f"Deleted a date. Event: {event}")
         else:
-            print(f"Error deleting a date.\nDocument: {name}\nError: {json.dumps(delete_response.json(), indent=4)}")
+            print(f"Error deleting a date.\nDocument ID: {name}\nError: {json.dumps(delete_response.json(), indent=4)}")
